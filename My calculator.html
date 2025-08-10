@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Professional Calculator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .calculator {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
+    box-shadow: 
+      0 32px 64px rgba(0, 0, 0, 0.15),
+      0 16px 32px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    width: 380px;
+    padding: 32px;
+    position: relative;
+    transform: translateY(0);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .calculator:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 40px 80px rgba(0, 0, 0, 0.2),
+      0 20px 40px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  .calculator::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+    border-radius: 24px 24px 0 0;
+  }
+
+  .display-container {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .display-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  }
+
+  .display {
+    color: #1e293b;
+    font-size: 2.5rem;
+    font-weight: 300;
+    text-align: right;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    user-select: none;
+    transition: all 0.2s ease;
+  }
+
+  .operation-display {
+    color: #64748b;
+    font-size: 1rem;
+    font-weight: 400;
+    text-align: right;
+    margin-bottom: 8px;
+    min-height: 20px;
+    opacity: 0.8;
+  }
+
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  button {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    color: #334155;
+    font-size: 1.25rem;
+    font-weight: 500;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    user-select: none;
+    font-family: inherit;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  button:hover {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    border-color: rgba(148, 163, 184, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  button:active {
+    transform: translateY(0);
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.2),
+      inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  button.operator {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border-color: rgba(99, 102, 241, 0.5);
+  }
+
+  button.operator:hover {
+    background: linear-gradient(135deg, #5855eb 0%, #7c3aed 100%);
+    box-shadow: 
+      0 4px 12px rgba(99, 102, 241, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  button.clear {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border-color: rgba(239, 68, 68, 0.5);
+  }
+
+  button.clear:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    box-shadow: 
+      0 4px 12px rgba(239, 68, 68, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  button.equals {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-color: rgba(16, 185, 129, 0.5);
+  }
+
+  button.equals:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 
+      0 4px 12px rgba(16, 185, 129, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  button.zero {
+    grid-column: span 2;
+  }
+
+  .brand {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  /* Ripple effect */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  @keyframes ripple {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+
+  /* Error state */
+  .display.error {
+    color: #ef4444;
+    animation: shake 0.3s ease-in-out;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+  }
+
+  /* Responsive design */
+  @media (max-width: 480px) {
+    .calculator {
+      width: 100%;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+    
+    .display {
+      font-size: 2rem;
+    }
+    
+    button {
+      font-size: 1.1rem;
+      height: 56px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="calculator" role="region" aria-label="Professional Calculator">
+  <div class="brand">PROFESSIONAL</div>
+  
+  <div class="display-container">
+    <div class="operation-display" id="operation-display"></div>
+    <div class="display" id="display" aria-live="polite" aria-atomic="true">0</div>
+  </div>
+  
+  <div class="buttons">
+    <button class="clear" data-action="clear" aria-label="Clear all">AC</button>
+    <button data-action="delete" aria-label="Delete last"></button>
+    <button class="operator" data-action="percent" aria-label="Percentage">%</button>
+    <button class="operator" data-action="divide" aria-label="Divide">÷</button>
+
+    <button data-number="7" aria-label="7">7</button>
+    <button data-number="8" aria-label="8">8</button>
+    <button data-number="9" aria-label="9">9</button>
+    <button class="operator" data-action="multiply" aria-label="Multiply">×</button>
+
+    <button data-number="4" aria-label="4">4</button>
+    <button data-number="5" aria-label="5">5</button>
+    <button data-number="6" aria-label="6">6</button>
+    <button class="operator" data-action="subtract" aria-label="Subtract"></button>
+
+    <button data-number="1" aria-label="1">1</button>
+    <button data-number="2" aria-label="2">2</button>
+    <button data-number="3" aria-label="3">3</button>
+    <button class="operator" data-action="add" aria-label="Add">+</button>
+
+    <button class="zero" data-number="0" aria-label="0">0</button>
+    <button data-number="." aria-label="Decimal point">.</button>
+    <button class="equals" data-action="equals" aria-label="Equals">=</button>
+  </div>
+</div>
+
+<script>
+  const display = document.getElementById('display');
+  const operationDisplay = document.getElementById('operation-display');
+  let currentInput = '0';
+  let previousInput = null;
+  let operator = null;
+  let resetNext = false;
+
+  function formatNumber(num) {
+    if (num === 'Error') return num;
+    const number = parseFloat(num);
+    if (isNaN(number)) return '0';
+    
+    // Handle very large or very small numbers
+    if (Math.abs(number) > 999999999 || (Math.abs(number) < 0.0001 && number !== 0)) {
+      return number.toExponential(6);
+    }
+    
+    // Format with appropriate decimal places
+    if (number % 1 === 0) {
+      return number.toLocaleString();
+    } else {
+      const formatted = number.toFixed(8).replace(/\.?0+$/, '');
+      const parts = formatted.split('.');
+      parts[0] = parseInt(parts[0]).toLocaleString();
+      return parts.join('.');
+    }
+  }
+
+  function updateDisplay() {
+    display.textContent = formatNumber(currentInput);
+    display.classList.remove('error');
+    
+    // Update operation display
+    if (operator && previousInput !== null) {
+      const operatorSymbol = {
+        'add': '+',
+        'subtract': '',
+        'multiply': '×',
+        'divide': '÷'
+      };
+      operationDisplay.textContent = `${formatNumber(previousInput)} ${operatorSymbol[operator]}`;
+    } else {
+      operationDisplay.textContent = '';
+    }
+  }
+
+  function appendNumber(num) {
+    if (resetNext) {
+      currentInput = num === '.' ? '0.' : num;
+      resetNext = false;
+    } else {
+      if (num === '.' && currentInput.includes('.')) return;
+      if (currentInput === '0' && num !== '.') {
+        currentInput = num;
+      } else {
+        // Limit input length
+        if (currentInput.length < 15) {
+          currentInput += num;
+        }
+      }
+    }
+  }
+
+  function chooseOperator(op) {
+    if (operator !== null && !resetNext) calculate();
+    previousInput = currentInput;
+    operator = op;
+    resetNext = true;
+  }
+
+  function calculate() {
+    const prev = parseFloat(previousInput.replace(/,/g, ''));
+    const curr = parseFloat(currentInput.replace(/,/g, ''));
+    if (isNaN(prev) || isNaN(curr)) return;
+
+    let result;
+    switch(operator) {
+      case 'add':
+        result = prev + curr;
+        break;
+      case 'subtract':
+        result = prev - curr;
+        break;
+      case 'multiply':
+        result = prev * curr;
+        break;
+      case 'divide':
+        if (curr === 0) {
+          currentInput = 'Error';
+          display.classList.add('error');
+          operator = null;
+          previousInput = null;
+          resetNext = true;
+          return;
+        }
+        result = prev / curr;
+        break;
+      default:
+        return;
+    }
+    
+    currentInput = result.toString();
+    operator = null;
+    previousInput = null;
+    resetNext = true;
+  }
+
+  function clearAll() {
+    currentInput = '0';
+    previousInput = null;
+    operator = null;
+    resetNext = false;
+  }
+
+  function deleteLast() {
+    if (resetNext || currentInput === 'Error') {
+      currentInput = '0';
+      return;
+    }
+    
+    const cleanInput = currentInput.replace(/,/g, '');
+    if (cleanInput.length === 1) {
+      currentInput = '0';
+    } else {
+      currentInput = cleanInput.slice(0, -1);
+    }
+  }
+
+  function percent() {
+    const curr = parseFloat(currentInput.replace(/,/g, ''));
+    if (isNaN(curr)) return;
+    currentInput = (curr / 100).toString();
+  }
+
+  function createRipple(e, button) {
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top - size / 2;
+    
+    const ripple = document.createElement('span');
+    ripple.classList.add('ripple');
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+    
+    button.appendChild(ripple);
+    
+    setTimeout(() => {
+      ripple.remove();
+    }, 600);
+  }
+
+  document.querySelectorAll('button').forEach(button => {
+    button.addEventListener('click', (e) => {
+      createRipple(e, button);
+      
+      if (button.hasAttribute('data-number')) {
+        appendNumber(button.getAttribute('data-number'));
+        updateDisplay();
+      } else if (button.hasAttribute('data-action')) {
+        const action = button.getAttribute('data-action');
+        switch(action) {
+          case 'clear':
+            clearAll();
+            updateDisplay();
+            break;
+          case 'delete':
+            deleteLast();
+            updateDisplay();
+            break;
+          case 'percent':
+            percent();
+            updateDisplay();
+            break;
+          case 'add':
+          case 'subtract':
+          case 'multiply':
+          case 'divide':
+            chooseOperator(action);
+            updateDisplay();
+            break;
+          case 'equals':
+            calculate();
+            updateDisplay();
+            break;
+        }
+      }
+    });
+  });
+
+  // Keyboard support with improved handling
+  window.addEventListener('keydown', e => {
+    e.preventDefault(); // Prevent default browser behavior
+    
+    if ((e.key >= '0' && e.key <= '9') || e.key === '.') {
+      appendNumber(e.key);
+      updateDisplay();
+    } else if (e.key === '+' || e.key === '-' || e.key === '*' || e.key === '/') {
+      const opMap = {'+': 'add', '-': 'subtract', '*': 'multiply', '/': 'divide'};
+      chooseOperator(opMap[e.key]);
+      updateDisplay();
+    } else if (e.key === 'Enter' || e.key === '=') {
+      calculate();
+      updateDisplay();
+    } else if (e.key === 'Backspace' || e.key === 'Delete') {
+      deleteLast();
+      updateDisplay();
+    } else if (e.key.toLowerCase() === 'c' || e.key === 'Escape') {
+      clearAll();
+      updateDisplay();
+    } else if (e.key === '%') {
+      percent();
+      updateDisplay();
+    }
+  });
+
+  // Initialize display
+  updateDisplay();
+</script>
+
+</body>
+</html>
